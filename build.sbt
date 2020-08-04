@@ -21,20 +21,20 @@ Test / parallelExecution := false
 
 import Dependencies._
 
-//releaseProcess := Seq[ReleaseStep](
-//  checkSnapshotDependencies,
-//  inquireVersions,
-//  runClean,
-//  runTest,
-//  setReleaseVersion,
-//  commitReleaseVersion,
-//  tagRelease,
-//  releaseStepCommand("publishSigned"),
-//  //  releaseStepCommand("sonatypeBundleRelease"),
-//  setNextVersion,
-//  commitNextVersion,
-//  pushChanges
-//)
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  releaseStepCommand("publishSigned"),
+  //  releaseStepCommand("sonatypeBundleRelease"),
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
 
 lazy val fixedWidth = (project in file("."))
   .settings(
