@@ -18,6 +18,7 @@ package za.co.absa.fixedWidth.util
 import org.apache.spark.sql.types.StructField
 
 import scala.util.control.NonFatal
+import scala.util.{Success, Try}
 
 object FixedWidthParameters {
 
@@ -32,7 +33,8 @@ object FixedWidthParameters {
     try {
       parameters.getOrElse("trimValues", "false").toBoolean
     } catch {
-      case _: Exception => throw new IllegalArgumentException("trimValues option should be only true or false")
+      case NonFatal(e) =>
+        throw new IllegalArgumentException("Unable to parse trimValues option. It should be only true or false", e)
     }
   }
 
@@ -41,12 +43,13 @@ object FixedWidthParameters {
   }
 
   private[fixedWidth] def getWidthValue(field: StructField): Int = {
-    try {
-      val width = field.metadata.getString("width")
-      width.toInt
-    }
-    catch {
-      case NonFatal(_) => throw new IllegalArgumentException(
+    val maybeString = Try { field.metadata.getString("width") }
+    val maybeLong = Try { field.metadata.getLong("width") }
+
+    (maybeString, maybeLong) match {
+      case (Success(value), _) => value.toInt
+      case (_, Success(value)) => value.toInt
+      case _ => throw new IllegalArgumentException(
         s"Unable to parse metadata: width of column: ${field.name} : ${field.metadata.toString()}"
       )
     }

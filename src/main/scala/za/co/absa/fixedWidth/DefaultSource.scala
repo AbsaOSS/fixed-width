@@ -52,13 +52,13 @@ class DefaultSource
 
     val path = parameters("path")
     val trimValues = parameters.getOrElse("trimValues", "false").toBoolean
-    val dateFormat = parameters.getOrElse("dateFormat", null)
+    val dateFormat = parameters.get("dateFormat")
     val parseMode = parameters.getOrElse("mode", "FAILFAST")
     val charset = parameters.getOrElse("charset", TextFile.DEFAULT_CHARSET.name())
     val treatEmptyValuesAsNulls = parameters.getOrElse("treatEmptyValuesAsNulls", "false").toBoolean
     val nullValue = parameters.getOrElse("nullValue", "")
 
-    new FixedWidthRelation(
+    FixedWidthRelation(
       () => TextFile.withCharset(sqlContext.sparkContext, path, charset),
       schema,
       trimValues,

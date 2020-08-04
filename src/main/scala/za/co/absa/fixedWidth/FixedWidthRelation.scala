@@ -29,7 +29,7 @@ import scala.util.control.NonFatal
 case class FixedWidthRelation(baseRDD: () => RDD[String],
                               userSchema: StructType,
                               trimValues: Boolean,
-                              dateFormat: String = null,
+                              dateFormat: Option[String] = None,
                               parseMode: String,
                               treatEmptyValuesAsNulls: Boolean,
                               nullValue: String = "")
@@ -48,19 +48,20 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
     logger.warn(s"$parseMode is not a valid parse mode. Using ${ParseModes.DEFAULT}.")
   }
   private val dropMalformed = ParseModes.isDropMalformedMode(parseMode)
-  private val dateFormatter: SimpleDateFormat = if (dateFormat != null) {
-    new SimpleDateFormat(dateFormat)
+  private val dateFormatter: Option[SimpleDateFormat] = if (dateFormat.isDefined) {
+    Some(new SimpleDateFormat(dateFormat.get))
   } else {
-    new SimpleDateFormat()
+    None
   }
 
   override def schema: StructType = userSchema
 
   override def buildScan(): RDD[Row] = {
     val schemaFields = schema.fields.zipWithIndex
+    val columnWidths = getWidthArray(schema.fields)
 
     baseRDD().mapPartitions { iter =>
-      parsePartitions(iter).flatMap { row =>
+      parsePartitions(iter, columnWidths).flatMap { row =>
         parseRow(schemaFields, row)
       }
     }
@@ -77,6 +78,7 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
         val field = s._1
         val index = s._2
         TypeCast.castTo(
+          s._1.name,
           row(index),
           field.dataType,
           field.nullable,
@@ -89,9 +91,7 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
     }
   }
 
-  private def parsePartitions(iter: Iterator[String]): Iterator[Seq[String]] = {
-    val columnWidths = getWidthArray(schema.fields)
-
+  private def parsePartitions(iter: Iterator[String], columnWidths: Seq[ColumnWidth]): Iterator[Seq[String]] = {
     iter.flatMap { line =>
       try {
         Some(columnWidths.map { width =>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ABSA Group Limited
+ * Copyright 2020 ABSA Group Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-import sbt._
+package za.co.absa.fixedWidth
 
-object Dependencies {
-  val baseDependencies = List(
-    "org.apache.spark" %% "spark-core" % "2.4.4" % Provided,
-    "org.apache.spark" %% "spark-sql"  % "2.4.4" % Provided,
-    "org.scalatest"    %% "scalatest" % "3.0.5"  % Test
-  )
-}
+case class NullInNonNullableField(fieldName: String)
+  extends Exception(s"Null found in non nullable field $fieldName")
+
+case class UnsupportedDataTypeCast(fieldName: String, castType: String)
+  extends Exception(s"Unsupported cast type of field $fieldName to type $castType")

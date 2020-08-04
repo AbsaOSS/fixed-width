@@ -37,7 +37,7 @@ package object fixedWidth {
         () => TextFile.withCharset(sqlContext.sparkContext, filePath, charset),
         userSchema = schema,
         trimValues = trimValues,
-        dateFormat = dateFormat,
+        dateFormat = Option(dateFormat),
         parseMode = mode,
         treatEmptyValuesAsNulls = false,
         nullValue = nullValue)(sqlContext)
