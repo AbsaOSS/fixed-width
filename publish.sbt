@@ -18,7 +18,7 @@ ThisBuild / organizationName := "ABSA Group Limited"
 ThisBuild / organizationHomepage := Some(url("https://www.absa.africa"))
 ThisBuild / scmInfo := Some(
   ScmInfo(
-    browseUrl = url("http://github.com/AbsaOSS/hermes/tree/master"),
+    browseUrl = url("http://github.com/AbsaOSS/fixed-width/tree/master"),
     connection = "scm:git:git://github.com/AbsaOSS/fixed-width.git",
     devConnection = "scm:git:ssh://github.com/AbsaOSS/fixed-width.git"
   )
