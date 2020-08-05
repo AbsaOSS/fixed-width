@@ -39,9 +39,11 @@ private[fixedWidth] object TypeCast {
              nullValue: String = "",
              dateFormatter: Option[SimpleDateFormat] = None): Any = {
 
-    if (((datum == nullValue) || (treatEmptyValuesAsNulls && datum.isEmpty)) && nullable){
+    val isValueNull = (datum == nullValue) || (treatEmptyValuesAsNulls && datum.isEmpty)
+
+    if (isValueNull && nullable){
       null
-    } else if (((datum == nullValue) || (treatEmptyValuesAsNulls && datum.isEmpty)) && !nullable) {
+    } else if (isValueNull && !nullable) {
       throw NullInNonNullableField(fieldName)
     }
     else {

@@ -16,9 +16,10 @@
 
 package za.co.absa.fixedWidth.util
 
+import java.nio.charset.{Charset, UnsupportedCharsetException}
+
 import org.apache.spark.sql.types.StructField
 
-import scala.util.control.NonFatal
 import scala.util.{Success, Try}
 
 object FixedWidthParameters {
@@ -28,15 +29,25 @@ object FixedWidthParameters {
       throw new IllegalStateException(s"Path to source either empty or not defined")
   }
 
+  private def validateBooleanValues(paramName: String, maybeString: Option[String]): Unit = {
+    try { if (maybeString.isDefined) maybeString.get.toBoolean } catch {
+      case e: IllegalArgumentException =>
+        throw new IllegalArgumentException(s"Unable to parse $paramName option. It should be only true or false", e)
+    }
+  }
+
+  private def validateCharset(maybeString: Option[String]): Unit = {
+    try { if (maybeString.isDefined) Charset.forName(maybeString.get) } catch {
+      case _: UnsupportedCharsetException =>
+        throw new UnsupportedCharsetException(s"Unable to parse charset option. ${maybeString.get} is invalid")
+    }
+  }
+
   private[fixedWidth] def validateRead(parameters: Map[String, String]): Unit = {
     checkPath(parameters.get("path"))
-
-    try {
-      parameters.getOrElse("trimValues", "false").toBoolean
-    } catch {
-      case NonFatal(e) =>
-        throw new IllegalArgumentException("Unable to parse trimValues option. It should be only true or false", e)
-    }
+    validateBooleanValues("trimValues", parameters.get("trimValues"))
+    validateBooleanValues("treatEmptyValuesAsNulls", parameters.get("treatEmptyValuesAsNulls"))
+    validateCharset(parameters.get("charset"))
   }
 
   private[fixedWidth] def validateWrite(parameters: Map[String, String]): Unit = {

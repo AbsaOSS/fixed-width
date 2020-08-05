@@ -16,6 +16,8 @@
 
 package za.co.absa.fixedWidth.util
 
+import java.nio.charset.UnsupportedCharsetException
+
 import org.apache.spark.sql.types.{MetadataBuilder, StringType, StructField}
 import org.scalatest.FunSuite
 
@@ -39,7 +41,12 @@ class FixedWidthParametersTest extends FunSuite {
   private val structFieldNone = StructField("randomColumn", StringType, metadata = noWidthMetadata)
 
   test("ValidateRead - positive") {
-    FixedWidthParameters.validateRead(Map("path" -> "/alfa/beta", "trimValues" ->  "true"))
+    val params = Map(
+      "path" -> "/alfa/beta",
+      "trimValues" ->  "true",
+      "treatEmptyValuesAsNulls" -> "false",
+      "charset" -> "UTF-16")
+    FixedWidthParameters.validateRead(params)
   }
 
   test("ValidateRead - missing path") {
@@ -52,6 +59,15 @@ class FixedWidthParametersTest extends FunSuite {
     val expectedMsg = "Unable to parse trimValues option. It should be only true or false"
     val msg = intercept[IllegalArgumentException] {
       FixedWidthParameters.validateRead(Map("path" -> "/alfa/beta", "trimValues" -> "blabla"))
+    }
+    assert(expectedMsg == msg.getMessage)
+  }
+
+  test("ValidateRead - unsupported charset") {
+    val charset = "ALFA"
+    val expectedMsg = s"Unable to parse charset option. $charset is invalid"
+    val msg = intercept[UnsupportedCharsetException] {
+      FixedWidthParameters.validateRead(Map("path" -> "/alfa/beta", "charset" -> charset))
     }
     assert(expectedMsg == msg.getMessage)
   }
