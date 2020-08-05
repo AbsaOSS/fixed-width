@@ -30,14 +30,14 @@ object FixedWidthParameters {
   }
 
   private def validateBooleanValues(paramName: String, maybeString: Option[String]): Unit = {
-    try { if (maybeString.isDefined) maybeString.get.toBoolean } catch {
+    try { maybeString.map(_.toBoolean) } catch {
       case e: IllegalArgumentException =>
         throw new IllegalArgumentException(s"Unable to parse $paramName option. It should be only true or false", e)
     }
   }
 
   private def validateCharset(maybeString: Option[String]): Unit = {
-    try { if (maybeString.isDefined) Charset.forName(maybeString.get) } catch {
+    try { maybeString.map(Charset.forName) } catch {
       case _: UnsupportedCharsetException =>
         throw new UnsupportedCharsetException(s"Unable to parse charset option. ${maybeString.get} is invalid")
     }

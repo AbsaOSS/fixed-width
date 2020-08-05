@@ -49,11 +49,7 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
     logger.warn(s"$parseMode is not a valid parse mode. Using ${ParseModes.DEFAULT}.")
   }
   private val dropMalformed = ParseModes.isDropMalformedMode(parseMode)
-  private val dateFormatter: Option[SimpleDateFormat] = if (dateFormat.isDefined) {
-    Some(new SimpleDateFormat(dateFormat.get))
-  } else {
-    None
-  }
+  private val dateFormatter: Option[SimpleDateFormat] = dateFormat.map(new SimpleDateFormat(_))
 
   override def schema: StructType = userSchema
 
