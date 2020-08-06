@@ -22,6 +22,7 @@ import za.co.absa.fixedWidth.util.SparkSessionTestWrapper
 
 class FixedWidthRelationTest extends FunSuite with SparkSessionTestWrapper {
   private val filePath = getClass.getResource("/fixed-width.txt").getPath
+  private val emptyFilePath = getClass.getResource("/emptyFile.txt").getPath
 
   private val width20Metadata = new MetadataBuilder()
     .putString("width", "20")
@@ -65,6 +66,17 @@ class FixedWidthRelationTest extends FunSuite with SparkSessionTestWrapper {
       .load(filePath)
 
     assert(4 == result.collect().length)
+    assert(defaultSchema == result.schema)
+  }
+
+  test("Read FixedWidth empty") {
+    val result = spark
+      .read
+      .format("fixed-width")
+      .schema(defaultSchema)
+      .load(emptyFilePath)
+
+    assert(0 == result.collect().length)
     assert(defaultSchema == result.schema)
   }
 }
