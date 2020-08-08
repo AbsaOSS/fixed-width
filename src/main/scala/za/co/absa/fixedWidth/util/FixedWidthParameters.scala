@@ -55,14 +55,18 @@ object FixedWidthParameters {
   }
 
   private[fixedWidth] def getWidthValue(field: StructField): Int = {
-    val maybeString = Try { field.metadata.getString("width") }
-    val maybeLong = Try { field.metadata.getLong("width") }
+    val metadataKey = "width"
+    val maybeLong = Try(field.metadata.getLong(metadataKey)).recover{
+      case _ => field.metadata.getString(metadataKey).toLong
+    }
 
-    (maybeString, maybeLong) match {
-      case (Success(value), _) => value.toInt
-      case (_, Success(value)) => value.toInt
+    maybeLong match {
+      case Success(value) if (value >= 1) && (value <= Int.MaxValue) => value.toInt
+      case Success(value) => throw new IllegalArgumentException(
+        s"Width of column ${field.name} out of positive integer range. Width found $value"
+      )
       case _ => throw new IllegalArgumentException(
-        s"Unable to parse metadata: width of column: ${field.name} : ${field.metadata.toString()}"
+        s"Unable to parse metadata: width of column: ${field.name}: ${field.metadata.toString()}"
       )
     }
   }

@@ -31,7 +31,7 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
                               userSchema: StructType,
                               trimValues: Boolean,
                               dateFormat: Option[String] = None,
-                              parseMode: String,
+                              parseMode: String = "PERMISSIVE",
                               treatEmptyValuesAsNulls: Boolean,
                               nullValue: String = "")
                              (@transient val sqlContext: SQLContext)
@@ -71,11 +71,9 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
     } else if (failFast && schemaFields.length != row.length) {
       throw new RuntimeException(s"Malformed line in FAILFAST mode: ${row.mkString("\t")}")
     } else {
-      val typedRow = schemaFields.map { s =>
-        val field = s._1
-        val index = s._2
+      val typedRow = schemaFields.map { case (field, index) =>
         TypeCast.castTo(
-          s._1.name,
+          field.name,
           row(index),
           field.dataType,
           field.nullable,

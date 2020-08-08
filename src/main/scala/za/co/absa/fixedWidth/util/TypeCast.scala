@@ -64,14 +64,10 @@ private[fixedWidth] object TypeCast {
           datum.toBoolean
         case _: DecimalType =>
           new BigDecimal(datum)
-        case _: TimestampType if dateFormatter.isDefined =>
-          new Timestamp(dateFormatter.get.parse(datum).getTime)
         case _: TimestampType =>
-          Timestamp.valueOf(datum)
-        case _: DateType if dateFormatter.isDefined =>
-          new Date(dateFormatter.get.parse(datum).getTime)
+          dateFormatter.map(_.parse(datum)).getOrElse(Timestamp.valueOf(datum))
         case _: DateType =>
-          Date.valueOf(datum)
+          dateFormatter.map(_.parse(datum)).getOrElse(Date.valueOf(datum))
         case _: StringType =>
           datum
         case _ => throw UnsupportedDataTypeCast(fieldName, castType.typeName)

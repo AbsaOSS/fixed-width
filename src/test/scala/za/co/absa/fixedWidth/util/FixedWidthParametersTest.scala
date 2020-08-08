@@ -36,9 +36,15 @@ class FixedWidthParametersTest extends FunSuite {
     .putBoolean("bogusMetada", false)
     .build()
 
+  private val negativeWidthMetadata = new MetadataBuilder()
+    .putLong("width", -10)
+    .putBoolean("bogusMetada", false)
+    .build()
+
   private val structFieldString = StructField("randomColumn", StringType, metadata = stringMetadataGood)
   private val structFieldLong = StructField("randomColumn", StringType, metadata = longMetadataGood)
   private val structFieldNone = StructField("randomColumn", StringType, metadata = noWidthMetadata)
+  private val structFieldNegativeWidth = StructField("randomColumn", StringType, metadata = negativeWidthMetadata)
 
   test("ValidateRead - positive") {
     val params = Map(
@@ -91,8 +97,14 @@ class FixedWidthParametersTest extends FunSuite {
   }
 
   test("GetWidthValue - No parameter") {
-    val expectedMsg = """Unable to parse metadata: width of column: randomColumn : {"bogusMetada":false}"""
+    val expectedMsg = """Unable to parse metadata: width of column: randomColumn: {"bogusMetada":false}"""
     val msg = intercept[IllegalArgumentException] { FixedWidthParameters.getWidthValue(structFieldNone) }
+    assert(expectedMsg == msg.getMessage)
+  }
+
+  test("GetWidthValue - Negative width parameter") {
+    val expectedMsg = """Width of column randomColumn out of positive integer range. Width found -10"""
+    val msg = intercept[IllegalArgumentException] { FixedWidthParameters.getWidthValue(structFieldNegativeWidth) }
     assert(expectedMsg == msg.getMessage)
   }
 
