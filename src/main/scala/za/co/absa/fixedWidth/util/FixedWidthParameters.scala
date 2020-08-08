@@ -18,11 +18,28 @@ package za.co.absa.fixedWidth.util
 
 import java.nio.charset.{Charset, UnsupportedCharsetException}
 
-import org.apache.spark.sql.types.StructField
+import org.apache.spark.sql.types._
 
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 object FixedWidthParameters {
+  private[fixedWidth] def validateSchema(schema: StructType): Unit = {
+    if (schema == null) throw SchemaValidationFailed(Seq("Schema not provided"))
+
+    val issueMessages = schema.fields.foldLeft(Seq.empty[String]) { (issues, field) =>
+      if (field.metadata.contains("width")) {
+        Try(FixedWidthParameters.getWidthValue(field)) match {
+          case Success(_) => issues
+          case Failure(exception) => issues :+ exception.getMessage
+        }
+      } else {
+        issues :+ s"Column ${field.name} does not contain metadata width"
+      }
+    }
+
+    if (issueMessages.nonEmpty) throw SchemaValidationFailed(issueMessages)
+  }
+
 
   private def checkPath(path: Option[String]): Unit = {
     if(path.isEmpty || path.get == null || path.get.isEmpty)
@@ -71,3 +88,8 @@ object FixedWidthParameters {
     }
   }
 }
+
+case class SchemaValidationFailed(issueMessages: Seq[String])
+  extends Exception(
+    s"""Schema validation failed. Issues as follows:
+       |${issueMessages.mkString("\n")}""".stripMargin)

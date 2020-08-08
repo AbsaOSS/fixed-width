@@ -18,7 +18,7 @@ package za.co.absa.fixedWidth
 
 import org.apache.spark.sql.types._
 import org.scalatest.FunSuite
-import za.co.absa.fixedWidth.util.{SparkSessionTestWrapper, TextFile}
+import za.co.absa.fixedWidth.util.{SchemaValidationFailed, SparkSessionTestWrapper, TextFile}
 
 class DefaultSourceTest extends FunSuite with SparkSessionTestWrapper {
   private val defaultSource = new DefaultSource
@@ -31,7 +31,18 @@ class DefaultSourceTest extends FunSuite with SparkSessionTestWrapper {
 
   private val filePath = getClass.getResource("/testTextFile.txt").getPath
 
+  private val widthMetadata = new MetadataBuilder()
+    .putLong("width", 10)
+    .build()
+
   private val defaultSchema = StructType(
+    List(
+      StructField("num", IntegerType, true, widthMetadata),
+      StructField("letter", StringType, true, widthMetadata)
+    )
+  )
+
+  private val missingWidthSchema = StructType(
     List(
       StructField("num", IntegerType, true),
       StructField("letter", StringType, true)
@@ -75,15 +86,38 @@ class DefaultSourceTest extends FunSuite with SparkSessionTestWrapper {
 
   test("CreateRelation - minimal params") {
     val baseRelation = defaultSource
-      .createRelation(spark.sqlContext, Map("path" -> filePath))
+      .createRelation(spark.sqlContext, Map("path" -> filePath), defaultSchema)
       .asInstanceOf[FixedWidthRelation]
     assert(fixedWidthRelationFull.baseRDD.apply().collect() sameElements baseRelation.baseRDD.apply().collect())
-    assert(null == baseRelation.userSchema)
+    assert(defaultSchema == baseRelation.userSchema)
     assert(!baseRelation.trimValues)
     assert(baseRelation.dateFormat.isEmpty)
     assert("FAILFAST" == baseRelation.parseMode)
     assert(!baseRelation.treatEmptyValuesAsNulls)
     assert("" == baseRelation.nullValue)
+  }
+
+  test("CreateRelation - bad schema") {
+    val expectedMessage = """Schema validation failed. Issues as follows:
+                            |Column num does not contain metadata width
+                            |Column letter does not contain metadata width""".stripMargin
+    val msg = intercept[SchemaValidationFailed] {
+      defaultSource
+        .createRelation(spark.sqlContext, Map("path" -> filePath), missingWidthSchema)
+        .asInstanceOf[FixedWidthRelation]
+    }
+    assert(expectedMessage == msg.getMessage)
+  }
+
+  test("CreateRelation - no schema") {
+    val expectedMessage = """Schema validation failed. Issues as follows:
+                            |Schema not provided""".stripMargin
+    val msg = intercept[SchemaValidationFailed] {
+      defaultSource
+        .createRelation(spark.sqlContext, Map("path" -> filePath))
+        .asInstanceOf[FixedWidthRelation]
+    }
+    assert(expectedMessage == msg.getMessage)
   }
 
 }

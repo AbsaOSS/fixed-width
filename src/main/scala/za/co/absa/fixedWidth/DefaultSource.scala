@@ -50,6 +50,7 @@ class DefaultSource
                               parameters: Map[String, String],
                               schema: StructType): BaseRelation = {
     FixedWidthParameters.validateRead(parameters)
+    FixedWidthParameters.validateSchema(schema)
 
     val path = parameters("path")
     val trimValues = parameters.getOrElse("trimValues", "false").toBoolean
