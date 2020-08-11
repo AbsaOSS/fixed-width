@@ -18,7 +18,7 @@ package za.co.absa.fixedWidth
 
 import org.apache.spark.sql.types._
 import org.scalatest.FunSuite
-import za.co.absa.fixedWidth.util.{SchemaValidationFailed, SparkSessionTestWrapper, TextFile}
+import za.co.absa.fixedWidth.util.{SparkSessionTestWrapper, TextFile}
 
 class DefaultSourceTest extends FunSuite with SparkSessionTestWrapper {
   private val defaultSource = new DefaultSource

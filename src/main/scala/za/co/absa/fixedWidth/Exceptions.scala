@@ -21,3 +21,14 @@ case class NullInNonNullableField(fieldName: String)
 
 case class UnsupportedDataTypeCast(fieldName: String, castType: String)
   extends Exception(s"Unsupported cast type of field $fieldName to type $castType")
+
+case class SchemaValidationFailed(issueMessages: Seq[String])
+  extends Exception(
+    s"""Schema validation failed. Issues as follows:
+       |${issueMessages.mkString("\n")}""".stripMargin)
+
+case class ValidationException(str: String) extends Exception(str)
+
+case class ValidationsException(validation: Seq[ValidationException]) extends Exception(
+  s"""Parameter validations issues found. Issues are:
+     |${validation.map(_.getMessage).mkString("\n")}""".stripMargin)

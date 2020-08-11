@@ -32,7 +32,7 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
                               trimValues: Boolean,
                               dateFormat: Option[String] = None,
                               parseMode: String = "PERMISSIVE",
-                              treatEmptyValuesAsNulls: Boolean,
+                              treatEmptyValuesAsNulls: Boolean = false,
                               nullValue: String = "")
                              (@transient val sqlContext: SQLContext)
   extends BaseRelation
@@ -105,7 +105,7 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
     fields.foldLeft(Seq.empty[ColumnWidth]) { (acc, field) =>
       val index = acc.lastOption.getOrElse((0, 0))._2
       if (field.metadata.contains("width")) {
-        val width = FixedWidthParameters.getWidthValue(field)
+        val width = SchemaUtils.getWidthValue(field)
         val length = index + width
         val columnWidth: ColumnWidth = (index, length)
         acc :+ columnWidth

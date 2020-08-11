@@ -19,7 +19,7 @@ package za.co.absa.fixedWidth
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.sources._
 import org.apache.spark.sql.types.StructType
-import za.co.absa.fixedWidth.util.{FixedWidthParameters, TextFile}
+import za.co.absa.fixedWidth.util.{FixedWidthValidations, TextFile}
 
 /**
  * Provides access to FixedWidth data from pure SQL statements (i.e. for users of the
@@ -49,8 +49,8 @@ class DefaultSource
   override def createRelation(sqlContext: SQLContext,
                               parameters: Map[String, String],
                               schema: StructType): BaseRelation = {
-    FixedWidthParameters.validateRead(parameters)
-    FixedWidthParameters.validateSchema(schema)
+    FixedWidthValidations.validateRead(parameters)
+    FixedWidthValidations.validateSchema(schema)
 
     val path = parameters("path")
     val trimValues = parameters.getOrElse("trimValues", "false").toBoolean
