@@ -41,12 +41,10 @@ private[fixedWidth] object TypeCast {
 
     val isValueNull = (datum == nullValue) || (treatEmptyValuesAsNulls && datum.isEmpty)
 
-    if (isValueNull && nullable){
-      null
-    } else if (isValueNull && !nullable) {
-      throw NullInNonNullableField(fieldName)
-    }
-    else {
+    if (isValueNull) {
+      if (nullable) { null }
+      else { throw NullInNonNullableField(fieldName) }
+    } else {
       castType match {
         case _: ByteType =>
           datum.toByte
