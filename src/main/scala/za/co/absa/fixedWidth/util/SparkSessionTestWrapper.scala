@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ABSA Group Limited
+ * Copyright 2020 ABSA Group Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,14 +11,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-import sbt._
+package za.co.absa.fixedWidth.util
 
-object Dependencies {
-  val baseDependencies = List(
-    "org.apache.spark" %% "spark-core" % "2.4.4" % Provided,
-    "org.apache.spark" %% "spark-sql"  % "2.4.4" % Provided,
-    "org.scalatest"    %% "scalatest" % "3.0.5"  % Test
-  )
+import org.apache.spark.sql.SparkSession
+
+trait SparkSessionTestWrapper {
+
+  implicit val spark: SparkSession = SparkSession.builder()
+    .master("local[2]")
+    .appName("test")
+    .config("spark.ui.enabled", "false")
+    .config("spark.driver.bindAddress","127.0.0.1")
+    .config("spark.driver.host", "127.0.0.1")
+    .getOrCreate()
+
 }

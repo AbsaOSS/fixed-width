@@ -11,18 +11,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package za.co.absa.fixedWidth.util
 
 import java.math.BigDecimal
 import java.sql.{Date, Timestamp}
-import java.text.{NumberFormat, SimpleDateFormat}
-import java.util.Locale
+import java.text.SimpleDateFormat
 
 import org.apache.spark.sql.types._
-
-import scala.util.Try
+import za.co.absa.fixedWidth.{NullInNonNullableField, UnsupportedDataTypeCast}
 
 private[fixedWidth] object TypeCast {
   /**
@@ -32,15 +31,19 @@ private[fixedWidth] object TypeCast {
    * @param datum string value
    * @param castType SparkSQL type
    */
-  def castTo(datum: String,
+  def castTo(fieldName: String,
+             datum: String,
              castType: DataType,
              nullable: Boolean = true,
              treatEmptyValuesAsNulls: Boolean = false,
              nullValue: String = "",
-             dateFormatter: SimpleDateFormat = null): Any = {
+             dateFormatter: Option[SimpleDateFormat] = None): Any = {
 
-    if ((datum == nullValue && nullable) || (treatEmptyValuesAsNulls && datum.isEmpty)){
-      null
+    val isValueNull = (datum == nullValue) || (treatEmptyValuesAsNulls && datum.isEmpty)
+
+    if (isValueNull) {
+      if (nullable) { null }
+      else { throw NullInNonNullableField(fieldName) }
     } else {
       castType match {
         case _: ByteType =>
@@ -52,24 +55,20 @@ private[fixedWidth] object TypeCast {
         case _: LongType =>
           datum.toLong
         case _: FloatType =>
-          Try(datum.toFloat).getOrElse(NumberFormat.getInstance(Locale.getDefault).parse(datum).floatValue())
+          datum.toFloat
         case _: DoubleType =>
-          Try(datum.toDouble).getOrElse(NumberFormat.getInstance(Locale.getDefault).parse(datum).doubleValue())
+          datum.toDouble
         case _: BooleanType =>
           datum.toBoolean
         case _: DecimalType =>
           new BigDecimal(datum)
-        case _: TimestampType if dateFormatter != null =>
-          new Timestamp(dateFormatter.parse(datum).getTime)
         case _: TimestampType =>
-          Timestamp.valueOf(datum)
-        case _: DateType if dateFormatter != null =>
-          new Date(dateFormatter.parse(datum).getTime)
+          dateFormatter.map(_.parse(datum)).getOrElse(Timestamp.valueOf(datum))
         case _: DateType =>
-          Date.valueOf(datum)
+          dateFormatter.map(_.parse(datum)).getOrElse(Date.valueOf(datum))
         case _: StringType =>
           datum
-        case _ => throw new RuntimeException(s"Unsupported type: ${castType.typeName}")
+        case _ => throw UnsupportedDataTypeCast(fieldName, castType.typeName)
       }
     }
   }

@@ -11,6 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package za.co.absa.fixedWidth
@@ -29,9 +30,9 @@ import scala.util.control.NonFatal
 case class FixedWidthRelation(baseRDD: () => RDD[String],
                               userSchema: StructType,
                               trimValues: Boolean,
-                              dateFormat: String = null,
-                              parseMode: String,
-                              treatEmptyValuesAsNulls: Boolean,
+                              dateFormat: Option[String] = None,
+                              parseMode: String = "PERMISSIVE",
+                              treatEmptyValuesAsNulls: Boolean = false,
                               nullValue: String = "")
                              (@transient val sqlContext: SQLContext)
   extends BaseRelation
@@ -48,19 +49,16 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
     logger.warn(s"$parseMode is not a valid parse mode. Using ${ParseModes.DEFAULT}.")
   }
   private val dropMalformed = ParseModes.isDropMalformedMode(parseMode)
-  private val dateFormatter: SimpleDateFormat = if (dateFormat != null) {
-    new SimpleDateFormat(dateFormat)
-  } else {
-    new SimpleDateFormat()
-  }
+  private val dateFormatter: Option[SimpleDateFormat] = dateFormat.map(new SimpleDateFormat(_))
 
   override def schema: StructType = userSchema
 
   override def buildScan(): RDD[Row] = {
     val schemaFields = schema.fields.zipWithIndex
+    val columnWidths = getWidthArray(schema.fields)
 
     baseRDD().mapPartitions { iter =>
-      parsePartitions(iter).flatMap { row =>
+      parsePartitions(iter, columnWidths).flatMap { row =>
         parseRow(schemaFields, row)
       }
     }
@@ -73,10 +71,9 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
     } else if (failFast && schemaFields.length != row.length) {
       throw new RuntimeException(s"Malformed line in FAILFAST mode: ${row.mkString("\t")}")
     } else {
-      val typedRow = schemaFields.map { s =>
-        val field = s._1
-        val index = s._2
+      val typedRow = schemaFields.map { case (field, index) =>
         TypeCast.castTo(
+          field.name,
           row(index),
           field.dataType,
           field.nullable,
@@ -89,9 +86,7 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
     }
   }
 
-  private def parsePartitions(iter: Iterator[String]): Iterator[Seq[String]] = {
-    val columnWidths = getWidthArray(schema.fields)
-
+  private def parsePartitions(iter: Iterator[String], columnWidths: Seq[ColumnWidth]): Iterator[Seq[String]] = {
     iter.flatMap { line =>
       try {
         Some(columnWidths.map { width =>
@@ -110,7 +105,7 @@ case class FixedWidthRelation(baseRDD: () => RDD[String],
     fields.foldLeft(Seq.empty[ColumnWidth]) { (acc, field) =>
       val index = acc.lastOption.getOrElse((0, 0))._2
       if (field.metadata.contains("width")) {
-        val width = FixedWidthParameters.getWidthValue(field)
+        val width = SchemaUtils.getWidthValue(field)
         val length = index + width
         val columnWidth: ColumnWidth = (index, length)
         acc :+ columnWidth

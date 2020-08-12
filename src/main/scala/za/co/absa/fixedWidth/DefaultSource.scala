@@ -11,6 +11,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package za.co.absa.fixedWidth
@@ -18,7 +19,7 @@ package za.co.absa.fixedWidth
 import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.sources._
 import org.apache.spark.sql.types.StructType
-import za.co.absa.fixedWidth.util.{FixedWidthParameters, TextFile}
+import za.co.absa.fixedWidth.util.{FixedWidthValidations, TextFile}
 
 /**
  * Provides access to FixedWidth data from pure SQL statements (i.e. for users of the
@@ -48,17 +49,18 @@ class DefaultSource
   override def createRelation(sqlContext: SQLContext,
                               parameters: Map[String, String],
                               schema: StructType): BaseRelation = {
-    FixedWidthParameters.validateRead(parameters)
+    FixedWidthValidations.validateRead(parameters)
+    FixedWidthValidations.validateSchema(schema)
 
     val path = parameters("path")
     val trimValues = parameters.getOrElse("trimValues", "false").toBoolean
-    val dateFormat = parameters.getOrElse("dateFormat", null)
+    val dateFormat = parameters.get("dateFormat")
     val parseMode = parameters.getOrElse("mode", "FAILFAST")
     val charset = parameters.getOrElse("charset", TextFile.DEFAULT_CHARSET.name())
     val treatEmptyValuesAsNulls = parameters.getOrElse("treatEmptyValuesAsNulls", "false").toBoolean
     val nullValue = parameters.getOrElse("nullValue", "")
 
-    new FixedWidthRelation(
+    FixedWidthRelation(
       () => TextFile.withCharset(sqlContext.sparkContext, path, charset),
       schema,
       trimValues,
