@@ -49,8 +49,6 @@ object FixedWidthValidations {
       validateCharset(parameters.get("charset"))
     ).flatten
 
-    println(validation.map(_.getMessage).mkString("\n"))
-
     if (validation.nonEmpty)
       throw ValidationsException(validation)
   }
