@@ -39,7 +39,7 @@ private[fixedWidth] object TypeCast {
              nullValue: String = "",
              dateFormatter: Option[SimpleDateFormat] = None): Any = {
 
-    val isValueNull = (datum == nullValue) || (treatEmptyValuesAsNulls && datum.isEmpty)
+    val isValueNull = treatEmptyValuesAsNulls && (datum == nullValue || datum.isEmpty )
 
     if (isValueNull) {
       if (nullable) { null }
