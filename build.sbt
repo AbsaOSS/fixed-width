@@ -13,14 +13,23 @@
  * limitations under the License.
  */
 
-ThisBuild / organization := "za.co.absa"
-ThisBuild / name         := "fixed-width"
-ThisBuild / scalaVersion := "2.11.12"
-
-Test / parallelExecution := false
-
 import Dependencies._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+
+val scala211 = "2.11.12"
+val scala212 = "2.12.10"
+
+ThisBuild / organization := "za.co.absa"
+ThisBuild / name         := "fixed-width"
+ThisBuild / scalaVersion := scala211
+ThisBuild / crossScalaVersions := Seq(scala211, scala212)
+
+// Scala shouldn't be packaged so it is explicitly added as a provided dependency below
+ThisBuild / autoScalaLibrary := false
+
+lazy val printSparkVersion = taskKey[Unit]("Print Spark version spark-cobol is building against.")
+
+Test / parallelExecution := false
 
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
