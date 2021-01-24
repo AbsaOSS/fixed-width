@@ -62,8 +62,6 @@ class TypeCastTest extends FunSuite {
     val msg = intercept[UnsupportedDataTypeCast] {
       TypeCast.castTo(fieldName, "20000101", BinaryType)
     }
-    println(CalendarIntervalType.typeName)
-    println(msg.getMessage)
     assert(expectedMsg == msg.getMessage)
   }
 

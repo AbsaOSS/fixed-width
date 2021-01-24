@@ -25,7 +25,6 @@ jobs:
         uses: olafurpg/setup-scala@v10
         with:
           java-version: "adopt@1.8"
-      - uses: actions/checkout@v2
       - uses: coursier/cache-action@v5
       - name: Build and run tests
         run: sbt ++${{matrix.scala}} test -DSPARK_VERSION=${{matrix.spark}}
