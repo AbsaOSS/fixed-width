@@ -10,8 +10,8 @@ You can link against this library in your program at the following coordinates:
 #### Scala 2.11
 
 ```
-groupId: za.co.absa.cobrix
-artifactId: spark-cobol_2.11
+groupId: za.co.absa
+artifactId: fixed-width_2.11
 version: 0.1.0
 ```
 
