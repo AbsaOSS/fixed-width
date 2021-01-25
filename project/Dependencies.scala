@@ -20,8 +20,6 @@ object Dependencies {
 
   private val scalatestVersion = "3.0.5"
 
-  def getScalaDependency(scalaVersion: String): ModuleID = "org.scala-lang" % "scala-library" % scalaVersion % Provided
-
   val baseDependencies: Seq[ModuleID] = Seq(
     // provided
     "org.apache.spark" %% "spark-core"       % sparkVersion % Provided,
