@@ -13,14 +13,20 @@
  * limitations under the License.
  */
 
-ThisBuild / organization := "za.co.absa"
-ThisBuild / name         := "fixed-width"
-ThisBuild / scalaVersion := "2.11.12"
-
-Test / parallelExecution := false
-
 import Dependencies._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+
+val scala211 = "2.11.12"
+val scala212 = "2.12.10"
+
+ThisBuild / organization := "za.co.absa"
+ThisBuild / name         := "fixed-width"
+ThisBuild / scalaVersion := scala211
+ThisBuild / crossScalaVersions := Seq(scala211, scala212)
+
+lazy val printSparkVersion = taskKey[Unit]("Print Spark version fixed-width is building against.")
+
+Test / parallelExecution := false
 
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
@@ -40,6 +46,14 @@ releaseProcess := Seq[ReleaseStep](
 lazy val fixedWidth = (project in file("."))
   .settings(
     name := "fixed-width",
+    printSparkVersion := {
+      val log = streams.value.log
+      log.info(s"Building with Spark $sparkVersion")
+      sparkVersion
+    },
     libraryDependencies ++= baseDependencies,
-    test in assembly := {}
   )
+
+// release settings
+releaseCrossBuild := true
+addCommandAlias("releaseNow", ";set releaseVersionBump := sbtrelease.Version.Bump.Bugfix; release with-defaults")

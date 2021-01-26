@@ -58,9 +58,9 @@ class TypeCastTest extends FunSuite {
   }
 
   test("CastTo - Usuported type") {
-    val expectedMsg = "Unsupported cast type of field RandomFieldName to type calendarinterval"
+    val expectedMsg = "Unsupported cast type of field RandomFieldName to type binary"
     val msg = intercept[UnsupportedDataTypeCast] {
-      TypeCast.castTo(fieldName, "20000101", CalendarIntervalType)
+      TypeCast.castTo(fieldName, "20000101", BinaryType)
     }
     assert(expectedMsg == msg.getMessage)
   }

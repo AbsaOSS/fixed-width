@@ -16,9 +16,17 @@
 import sbt._
 
 object Dependencies {
-  val baseDependencies = List(
-    "org.apache.spark" %% "spark-core" % "2.4.4" % Provided,
-    "org.apache.spark" %% "spark-sql"  % "2.4.4" % Provided,
-    "org.scalatest"    %% "scalatest" % "3.0.5"  % Test
+  def sparkVersion: String = sys.props.getOrElse("SPARK_VERSION", "2.4.7")
+
+  private val scalatestVersion = "3.0.5"
+
+  val baseDependencies: Seq[ModuleID] = Seq(
+    // provided
+    "org.apache.spark" %% "spark-core"       % sparkVersion % Provided,
+    "org.apache.spark" %% "spark-sql"        % sparkVersion % Provided,
+    "org.apache.spark" %% "spark-catalyst"   % sparkVersion % Provided,
+
+    // test
+    "org.scalatest" %% "scalatest" % scalatestVersion % Test
   )
 }
