@@ -27,20 +27,23 @@ This package can be added to Spark using the `--packages` command line option. F
 #### Spark compiled with Scala 2.11
 
 ```shell
-$SPARK_HOME/bin/spark-shell --packages za.co.absa:fixed-width.11:0.1.0
+$SPARK_HOME/bin/spark-shell --packages za.co.absa:fixed-width_2.11:0.1.0
 ```
 
 ### Usage in code
 
 ```scala
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.SparkSession
+
 val sparkBuilder = SparkSession.builder().appName("Example")
 val spark = sparkBuilder.getOrCreate()
 
 val metadata = new MetadataBuilder().putLong("width", 10).build()
 val schema = StructType(
   List(
-    StructField("someColumn", StringType, metadata),
-    StructField("secondColumn", StringType, metadata)
+    StructField("someColumn", StringType, true, metadata),
+    StructField("secondColumn", StringType, true, metadata)
   )
 )
 
@@ -48,7 +51,7 @@ val dataframe = spark
   .read
   .format("fixed-width")
   .option("trimValues", "true")
-  .schema(shema)
+  .schema(schema)
   .load("/path/to/data/fixedWidthData")
 ```
 
