@@ -12,12 +12,16 @@ You can link against this library in your program at the following coordinates:
 ```
 groupId: za.co.absa
 artifactId: fixed-width_2.11
-version: 0.1.0
+version: 0.2.0
 ```
 
 #### Scala 2.12
 
-Can be compiled and published on request. Project should be compatible.
+```
+groupId: za.co.absa
+artifactId: fixed-width_2.12
+version: 0.2.0
+```
  
 
 ### Using with Spark shell
@@ -27,7 +31,13 @@ This package can be added to Spark using the `--packages` command line option. F
 #### Spark compiled with Scala 2.11
 
 ```shell
-$SPARK_HOME/bin/spark-shell --packages za.co.absa:fixed-width_2.11:0.1.0
+$SPARK_HOME/bin/spark-shell --packages za.co.absa:fixed-width_2.11:0.2.0
+```
+
+#### Spark compiled with Scala 2.12
+
+```shell
+$SPARK_HOME/bin/spark-shell --packages za.co.absa:fixed-width_2.12:0.2.0
 ```
 
 ### Usage in code
