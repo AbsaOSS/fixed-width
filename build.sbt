@@ -28,20 +28,20 @@ lazy val printSparkVersion = taskKey[Unit]("Print Spark version fixed-width is b
 
 Test / parallelExecution := false
 
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  runClean,
-  runTest,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  releaseStepCommand("publishSigned"),
-  //  releaseStepCommand("sonatypeBundleRelease"),
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
-)
+//releaseProcess := Seq[ReleaseStep](
+//  checkSnapshotDependencies,
+//  inquireVersions,
+//  runClean,
+//  runTest,
+//  setReleaseVersion,
+//  commitReleaseVersion,
+//  tagRelease,
+//  releaseStepCommand("publishSigned"),
+//  //  releaseStepCommand("sonatypeBundleRelease"),
+//  setNextVersion,
+//  commitNextVersion,
+//  pushChanges
+//)
 
 lazy val fixedWidth = (project in file("."))
   .settings(
