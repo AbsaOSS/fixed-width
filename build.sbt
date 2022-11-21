@@ -15,6 +15,7 @@
 
 import Dependencies._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+import com.github.sbt.jacoco.report.JacocoReportSettings
 
 val scala211 = "2.11.12"
 val scala212 = "2.12.10"
@@ -25,6 +26,15 @@ ThisBuild / scalaVersion := scala211
 ThisBuild / crossScalaVersions := Seq(scala211, scala212)
 
 lazy val printSparkVersion = taskKey[Unit]("Print Spark version fixed-width is building against.")
+
+lazy val commonJacocoReportSettings: JacocoReportSettings = JacocoReportSettings(
+  formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
+)
+
+lazy val commonJacocoExcludes: Seq[String] = Seq(
+//  "za.co.absa.fixedWidth.ValidationsException*", // class and related objects
+//  "za.co.absa.fixedWidth.FixedWidthRelation" // class only
+)
 
 Test / parallelExecution := false
 
@@ -52,6 +62,10 @@ lazy val fixedWidth = (project in file("."))
       sparkVersion
     },
     libraryDependencies ++= baseDependencies,
+  )
+  .settings(
+    jacocoReportSettings := commonJacocoReportSettings.withTitle("fixed-width Jacoco Report"),
+    jacocoExcludes := commonJacocoExcludes
   )
 
 // release settings
