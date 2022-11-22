@@ -27,15 +27,6 @@ ThisBuild / crossScalaVersions := Seq(scala211, scala212)
 
 lazy val printSparkVersion = taskKey[Unit]("Print Spark version fixed-width is building against.")
 
-lazy val commonJacocoReportSettings: JacocoReportSettings = JacocoReportSettings(
-  formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
-)
-
-lazy val commonJacocoExcludes: Seq[String] = Seq(
-//  "za.co.absa.fixedWidth.ValidationsException*", // class and related objects
-//  "za.co.absa.fixedWidth.FixedWidthRelation" // class only
-)
-
 Test / parallelExecution := false
 
 //releaseProcess := Seq[ReleaseStep](
@@ -61,13 +52,21 @@ lazy val fixedWidth = (project in file("."))
       log.info(s"Building with Spark $sparkVersion")
       sparkVersion
     },
-    libraryDependencies ++= baseDependencies,
-  )
-  .settings(
-    jacocoReportSettings := commonJacocoReportSettings.withTitle("fixed-width Jacoco Report"),
-    jacocoExcludes := commonJacocoExcludes
+    libraryDependencies ++= baseDependencies
   )
 
 // release settings
 releaseCrossBuild := true
 addCommandAlias("releaseNow", ";set releaseVersionBump := sbtrelease.Version.Bump.Bugfix; release with-defaults")
+
+// JaCoCo code coverage
+Test / jacocoReportSettings := JacocoReportSettings(
+  title = s"fixed-width Jacoco Report - ${scalaVersion.value}",
+  formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
+)
+
+// exclude example
+Test / jacocoExcludes := Seq(
+//  "za.co.absa.fixedWidth.ValidationsException*", // class and related objects
+//  "za.co.absa.fixedWidth.FixedWidthRelation" // class only
+)
