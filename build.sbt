@@ -15,6 +15,7 @@
 
 import Dependencies._
 import sbtrelease.ReleasePlugin.autoImport.ReleaseTransformations._
+import com.github.sbt.jacoco.report.JacocoReportSettings
 
 val scala211 = "2.11.12"
 val scala212 = "2.12.10"
@@ -51,9 +52,21 @@ lazy val fixedWidth = (project in file("."))
       log.info(s"Building with Spark $sparkVersion")
       sparkVersion
     },
-    libraryDependencies ++= baseDependencies,
+    libraryDependencies ++= baseDependencies
   )
 
 // release settings
 releaseCrossBuild := true
 addCommandAlias("releaseNow", ";set releaseVersionBump := sbtrelease.Version.Bump.Bugfix; release with-defaults")
+
+// JaCoCo code coverage
+Test / jacocoReportSettings := JacocoReportSettings(
+  title = s"fixed-width Jacoco Report - ${scalaVersion.value}",
+  formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
+)
+
+// exclude example
+Test / jacocoExcludes := Seq(
+//  "za.co.absa.fixedWidth.ValidationsException*", // class and related objects
+//  "za.co.absa.fixedWidth.FixedWidthRelation" // class only
+)

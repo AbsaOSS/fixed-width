@@ -70,3 +70,12 @@ val dataframe = spark
 |---|---|---|
 | trimValues | true/false | Should the whitespaces around data be trimmed |
 | charset | charset name (e.g. UTF-8) | Any valid charset used to write the FixedWidth file |
+
+### How to generate Code coverage report
+```sbt
+sbt jacoco
+```
+Code coverage will be generated on path:
+```
+{project-root}/target/scala-{scala_version}/jacoco/report/html
+```
