@@ -61,7 +61,7 @@ addCommandAlias("releaseNow", ";set releaseVersionBump := sbtrelease.Version.Bum
 
 // JaCoCo code coverage
 Test / jacocoReportSettings := JacocoReportSettings(
-  title = s"fixed-width Jacoco Report - ${scalaVersion.value}",
+  title = s"fixed-width Jacoco Report - scala:${scalaVersion.value}",
   formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
 )
 
