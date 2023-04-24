@@ -22,7 +22,7 @@ val scala212 = "2.12.10"
 
 ThisBuild / organization := "za.co.absa"
 ThisBuild / name         := "fixed-width"
-ThisBuild / scalaVersion := scala211
+ThisBuild / scalaVersion := scala212
 ThisBuild / crossScalaVersions := Seq(scala211, scala212)
 
 lazy val printSparkVersion = taskKey[Unit]("Print Spark version fixed-width is building against.")
